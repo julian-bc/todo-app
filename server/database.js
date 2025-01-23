@@ -11,39 +11,39 @@ const connPool = mysql.createPool({
 }).promise();
 
 export async function getTodosByID(id) {
-    const [row] = await connPool.query(
+    const [rows] = await connPool.query(
         `SELECT todos.*, shared_todos.shared_with_id 
         FROM todos 
         LEFT JOIN shared_todos ON todos.id = shared_todos.todo_id
         WHERE todos.user_id = ? OR shared_todos.shared_with_id = ?`,
-        [id]
-    )
+        [id, id]
+    );
 
-    return row[0];
+    return rows;
 }
 
 export async function getTodo(id) {
-    const [row] = await connPool.query(`SELECT * FROM todos WHERE id = ?`, [id]);
+    const [rows] = await connPool.query(`SELECT * FROM todos WHERE id = ?`, [id]);
 
-    return row[0];
+    return rows[0];
 }
 
 export async function getSharedTodoByID(id) {
-    const [row] = await connPool.query(`SELECT * FROM shared_todos WHERE todo_id = ?`, [id]);
+    const [rows] = await connPool.query(`SELECT * FROM shared_todos WHERE todo_id = ?`, [id]);
 
-    return row[0];
+    return rows[0];
 }
 
 export async function getUserByID(id) {
-    const [row] = await connPool.query(`SELECT * FROM users WHERE id = ?`, [id]);
+    const [rows] = await connPool.query(`SELECT * FROM users WHERE id = ?`, [id]);
 
-    return row[0];
+    return rows[0];
 }
 
 export async function getUserByEmail(email) {
-    const [row] = await connPool.query(`SELECT * FROM users WHERE email = ?`, [email]);
+    const [rows] = await connPool.query(`SELECT * FROM users WHERE email = ?`, [email]);
 
-    return row[0];
+    return rows[0];
 }
 
 export async function createTodo(user_id, title) {
