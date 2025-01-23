@@ -1,0 +1,89 @@
+import mysql from 'mysql2';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const connPool = mysql.createPool({
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE,
+}).promise();
+
+export async function getTodosByID(id) {
+    const [row] = await connPool.query(
+        `SELECT todos.*, shared_todos.shared_with_id 
+        FROM todos 
+        LEFT JOIN shared_todos ON todos.id = shared_todos.todo_id
+        WHERE todos.user_id = ? OR shared_todos.shared_with_id = ?`,
+        [id]
+    )
+
+    return row[0];
+}
+
+export async function getTodo(id) {
+    const [row] = await connPool.query(`SELECT * FROM todos WHERE id = ?`, [id]);
+
+    return row[0];
+}
+
+export async function getSharedTodoByID(id) {
+    const [row] = await connPool.query(`SELECT * FROM shared_todos WHERE todo_id = ?`, [id]);
+
+    return row[0];
+}
+
+export async function getUserByID(id) {
+    const [row] = await connPool.query(`SELECT * FROM users WHERE id = ?`, [id]);
+
+    return row[0];
+}
+
+export async function getUserByEmail(email) {
+    const [row] = await connPool.query(`SELECT * FROM users WHERE email = ?`, [email]);
+
+    return row[0];
+}
+
+export async function createTodo(user_id, title) {
+    const [result] = await connPool.query(
+        `INSERT INTO todos (user_id, title),
+        VALUES (?, ?)`, 
+        [user_id, title]
+    );
+
+    const todoId = result.insertId;
+    return getTodo(todoId);
+}
+
+export async function deleteTodo(id) {
+    const [result] = await connPool.query(
+        `DELETE FROM todos WHERE id = ?`, 
+        [id]
+    );
+    
+    return result
+}
+
+export async function toggleCompleted(id, value) {
+    const newValue = value === true ? 'TRUE': 'FALSE';
+    const [result] = await connPool.query(
+        `UPDATE todos 
+        SET completed = ? 
+        WHERE id = ?`, 
+        [newValue, id]
+    );
+
+    return result;
+}
+
+export async function shareTodo(todo_id, shared_with_id) {
+    const [result] = await connPool.query(
+        `INSERT INTO shared_todos (todo_id, shared_with_id),
+        VALUES (?, ?)`, 
+        [todo_id, shared_with_id]
+    );
+
+    return result.insertId;
+}
