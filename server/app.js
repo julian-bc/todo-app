@@ -11,9 +11,10 @@ import {
     getSharedTodoByID,
 } from './database.js'
 import cors from 'cors';
+import { BACKEND_URL } from './config.js';
 
 const corsOptions = {
-    origin: 'http://127.0.0.1:5173',
+    origin: `${BACKEND_URL}:19000`,
     methods: ['GET', 'POST'],
     credentials: true,
 }
@@ -63,6 +64,6 @@ app.post('/todos', async (req, res) => {
     res.status(201).send(todo);
 });
 
-app.listen(8080, () => {
+app.listen(8080, '0.0.0.0', () => {
     console.log('Server listening on port 8080');
 });
